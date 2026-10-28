@@ -1,7 +1,7 @@
-# Rencana Preprocessing & Cleaning Data X + YouTube, v2 (Kasus Keracunan MBG)
+# Rencana Preprocessing & Cleaning Data X + YouTube (Kasus Keracunan MBG)
 
-> Status: **diimplementasi 2026-10-28** di `src/anmedsos_prep/` (cara pakai: `README.md`). Disusun 2026-10-28. Menggantikan `preprocessing_plan.md` (v1, 2026-10-27).
-> Semua angka di dokumen ini diprofil ulang langsung dari `x/raw/`, `x/counts/`, `youtube/yt_comments_all.csv`,
+> Status: **diimplementasi 2026-10-28** di `src/anmedsos_prep/` (cara pakai: `README.md`). Disusun 2026-10-28.
+> Semua angka di dokumen ini diprofil langsung dari `x/raw/`, `x/counts/`, `youtube/yt_comments_all.csv`,
 > `youtube/yt_candidates.csv`, `youtube/sukoharjo/interim/*.csv`, dan `relabel_suggestion_n_videos.csv` (cek judul untuk profiling).
 > Window yang dipakai: **45 hari sejak insiden (WIB)**, 5 segmen × 9 hari.
 
@@ -97,37 +97,13 @@ flowchart LR
 | | |
 |---|---|
 | ✅ Data | Lengkap, tidak ada yang perlu ditarik lagi |
-| ✅ Keputusan | D2–D16 sudah diputuskan (§3) |
+| ✅ Keputusan | D2–D17 sudah diputuskan (§3) |
 | ✅ Pipeline | Diimplementasi (`python -m anmedsos_prep run`), 42 test lulus, QA lulus, output deterministik |
 | ✅ Aturan relevansi | `config/relevance_rules.yaml`, diterapkan identik ke kedua kasus (Task 3.2, 3.3) |
 | ✅ Langkah manual | Dihapus semua (D17): tidak ada labeling, validasi manual, atau sampel anotasi |
 | ⚠️ Privasi | `x/raw/` dan `x/context/` masih berisi ID akun & nama korban, jangan dibagikan |
 
 Bagian lain di bawah adalah detail. Bila hanya butuh garis besar, cukup baca bagian ini dan §3 (keputusan).
-
----
-
-## 0. Hasil pengecekan v1 terhadap data terbaru
-
-`yt_comments_all.csv` (hasil scrape ulang) mengubah beberapa hal di v1. Ringkasnya:
-
-| Bagian v1 | Status sekarang | Koreksi |
-|---|---|---|
-| Y2: komentar video `n` Karo belum ditarik | ✅ **Selesai untuk Karo.** Semua 161 video `n` dengan ≥ 5 komentar sudah ditarik (0 terlewat). | Sukoharjo **tidak** di-scrape ulang (D11: hanya 1 video `n` yang relevan). |
-| §0 RQ2: YT Karo 5.169 sebelum vs 7.790 sesudah laporan kesehatan | Angka itu hanya video `y`. | Dengan semua video: **10.382 vs 20.540** (sebelum relevansi video diterapkan). |
-| Y3: 12 video cakupan < 80% | Sekarang **42 video < 80%**, 5 di bawah 50%. | Penyebab utama baru: **batas 500 thread per video** (§2.2, Y-CAP). |
-| Y5: 22 komentar di luar window | Sekarang **228** (semua hari ≥ 45, sampai 2026-10-26). | Flag `in_window` collector konsisten 100% dengan hitungan 45 hari (0 selisih). |
-| Y7: 429 baris duplikat teks | Sekarang **1.286 baris / 401 teks**; 567 baris *author + teks* kembar. | |
-| YS3: Sukoharjo 1.580 vs Karo 12.959 | Sekarang **1.580 vs 30.922 (≈ 20×)**. | Ketimpangan makin besar; perbandingan wajib berbasis proporsi (§6). |
-| X3: "XS1 tidak punya file S2/S4" | **Usang.** `x_sukoharjo_XS1_S2.jsonl` dan `_S4.jsonl` ada. | Hapus dari daftar temuan. |
-| X2: bucket counts UTC | Benar. Bucket = 44 hari UTC penuh + potongan 7 jam & 17 jam di tepi. | Bobot cakupan per hari WIB butuh `granularity=hour` (Task 7.4). |
-| X4: relevansi XS2 | **Lebih parah dari dugaan.** 0 dari 174 tweet XS2-saja menyebut Sukoharjo/Dukuh/Solo. | Aturan relevansi khusus XS2 (Task 3.3, D13). |
-| Task 3.2 "filter `relevan == y`" | Bertentangan dengan D2 (relevansi via script). | Diganti `video_relevance()` (Task 3.2). |
-| Task 2.2 dedup memakai `text_norm` (sudah di-stem) | Stemming bisa menyatukan teks yang sebenarnya berbeda. | Pakai `dup_key` terpisah tanpa stem (Task 6.1). |
-| Task 4.1 cek satu fingerprint salt | Ada **dua salt** di data YouTube (YS11). | Fingerprint dicatat per file sumber (Task 5.1). |
-| Daftar nama korban "Febiona, Febiola, Febi Purba, Agnesia" | Di data, ejaan dominan **Febiola** (X: 201, YT: 20) dan **Febiona** (X: 79, YT: 30), ditambah "Febi Yona" (12) dan "Febi" (YT: 62). Proposal juga memakai "Febiola Purba". | Daftar varian di Task 5.2. |
-| `config/relevance_rules.yaml` | File aturan **belum ada** di repo. | ✅ Sudah ditulis (Task 3.2, 3.3). |
-| `preprocessing.ipynb` | Sudah 45 hari, tetapi dijalankan dengan `yt_comments.csv` lama (14.779 baris YT). | Ganti input Karo ke `yt_comments_all.csv`. |
 
 ---
 
@@ -202,7 +178,7 @@ Tingkat: 🔴 memblokir / mengubah hasil · 🟠 wajib ditangani pipeline · �
 | Y-WIN | 🟠 | 228 komentar di luar window (hari ≥ 45). Flag `in_window` collector = hitungan ulang 45 hari (0 selisih). | — |
 | Y-SEG | 🟡 | Distribusi in-window per segmen: S1 7.126 · S2 430 · S3 5.818 · S4 13.555 · S5 3.993. S2 (hari 9–17) sangat tipis dan 32% komentarnya dari satu video. | — |
 | Y-REL | 🔴 | Komentar video `n` (in-window) menurut cek judul manual: `inti` 8.695 · `abu` 5.271 · `sub_gibran` 2.027 · `sub_ejek` 1.821 · `tidak` 149. Relevansi video wajib ditentukan aturan yang sama dengan Sukoharjo (Task 3.2). | `relabel_suggestion_n_videos.csv` |
-| Y-SALT | 🔴 | Salt `author_hash` berbeda dari `yt_comments.csv` lama dan dari Sukoharjo (0 hash cocok untuk 12.981 komentar yang sama). Di dalam file konsisten. | v1 YS11 |
+| Y-SALT | 🔴 | Salt `author_hash` berbeda dari `yt_comments.csv` lama dan dari Sukoharjo (0 hash cocok untuk 12.981 komentar yang sama). Di dalam file konsisten. | — |
 | Y-DUP | 🟠 | Teks identik: 1.286 baris / 401 teks. *Author + teks* kembar: 567 baris (spam/copypasta, termasuk teks 8.154 karakter). Teks pendek sah dan sering: "stop mbg" 63, "bubarkan mbg" 31, "makan beracun gratis" 26, "hentikan mbg" 24, "tutup mbg" 21. | — |
 | Y-TXT | 🟠 | 1 teks kosong; 240 tanpa huruf (emoji/tanda baca saja); **1.020 berisi karakter zero-width**; 29 huruf matematis (𝗕𝗚𝗡); 13 `\r`; 1.094 `@mention`; 26 timestamp video (`1:23`); 2 URL; 9 aksara non-Latin. Panjang median 65 karakter, p99 487, maks 8.154. Tidak ada entitas HTML (`textFormat=plainText`). | — |
 | Y-AUTH | 🟡 | 22.233 penulis unik; teraktif 48 komentar; 95 penulis ≥ 10 komentar (in-window). | — |
@@ -219,8 +195,8 @@ Tingkat: 🔴 memblokir / mengubah hasil · 🟠 wajib ditangani pipeline · �
 | YS-VOL | 🔴 | Volume sangat timpang: 1.580 komentar in-window (vs Karo 30.922). 86% di S1. | — |
 | YS-DOM | 🟠 | **Dominasi video tinggi**: video teratas 14%, 5 teratas 49%, 10 teratas 70% komentar. Di S2 satu video = 77% komentar, di S3 = 89%. Tanpa koreksi, "pergeseran temporal" Sukoharjo-YT sebenarnya pergeseran antar-video. | — |
 | YS-WIN | 🟠 | 218 komentar (12%) di luar window, sampai ±558 hari setelah video terbit. | — |
-| YS-LBL | 🟡 | `channel_type` & `sub_event` kosong di 304 video. Bila tidak didapat, `channel_type` diturunkan dari daftar channel (Task 3.2) atau NA. | v1 YS1 |
-| YS-PROV | 🟡 | Raw search `YS4_S1` tertimpa (24 kandidat tanpa provenance); raw komentar tidak ada di arsip. | v1 YS5, YS8 |
+| YS-LBL | 🟡 | `channel_type` & `sub_event` kosong di 304 video. Bila tidak didapat, `channel_type` diturunkan dari daftar channel (Task 3.2) atau NA. | — |
+| YS-PROV | 🟡 | Raw search `YS4_S1` tertimpa (24 kandidat tanpa provenance); raw komentar tidak ada di arsip. | — |
 | YS-TXT | 🟡 | 0 teks kosong, 34 emoji-only, 81 `@mention`, 13 pasangan *author + teks* kembar. | — |
 
 ### 2.4 X
@@ -243,7 +219,7 @@ Tingkat: 🔴 memblokir / mengubah hasil · 🟠 wajib ditangani pipeline · �
 
 ## 3. Keputusan
 
-### 3.1 Sudah diputuskan (dari v1)
+### 3.1 Keputusan awal
 
 | ID | Keputusan |
 |---|---|

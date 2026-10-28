@@ -74,7 +74,7 @@ tests/                  pytest + proyek mini sintetis (tanpa data asli)
 notebooks/eda_qa.ipynb  EDA, hanya membaca processed/latest/
 x/                      collector X: x_counts.py, x_collect.py, x_context.py, x_verify.py, x_inspect.py, x_pilot.py
 youtube/sukoharjo/youtube_collect.py   collector YouTube (dipakai untuk kedua kasus)
-preprocessing_plan_v2.md               rencana, temuan profiling data, keputusan D1-D16, keterbatasan
+preprocessing_plan.md                  rencana, temuan profiling data, keputusan D2-D17, keterbatasan
 ```
 
 ---
@@ -214,5 +214,5 @@ ctx = view(c, "v_stance", cfg, require_context=True)       # D16: reply/quote X 
 - **Tidak ada redistribusi.** Data mentah dan `processed/` dikecualikan lewat `.gitignore`. Untuk replikasi, data
   ditarik ulang dengan kredensial sendiri memakai collector di atas. Post yang sudah dihapus tidak akan ikut.
 
-Keputusan desain (D1–D16), temuan kualitas data, dan keterbatasan lengkap ada di
-[preprocessing_plan_v2.md](preprocessing_plan_v2.md).
+Keputusan desain (D2–D17), temuan kualitas data, dan keterbatasan lengkap ada di
+[preprocessing_plan.md](preprocessing_plan.md).
