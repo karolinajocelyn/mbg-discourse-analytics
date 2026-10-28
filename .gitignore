@@ -1,0 +1,48 @@
+# ---- File lokal tim (tugas, catatan, arsip): tidak masuk repo ----
+_lokal/
+
+# ---- Data: TIDAK BOLEH masuk repo publik ----
+# Berisi ID akun asli, teks lengkap post/komentar, dan nama korban (anak di bawah umur).
+# Ketentuan X & YouTube juga tidak mengizinkan redistribusi konten mentah.
+x/raw/
+x/context/
+x/counts/
+x/pilot_x/
+youtube/*.csv
+youtube/sukoharjo/raw/
+youtube/sukoharjo/interim/
+*.jsonl
+*.zip
+relabel_suggestion_n_videos.csv
+processed/
+
+# Daftar nama korban: hanya ada di laptop tim (lihat config/victim_names.example.txt)
+config/victim_names.txt
+
+# Notebook lama berisi output sel dengan cuplikan data; diganti notebooks/eda_qa.ipynb
+preprocessing.ipynb
+
+# Dokumen tugas & proposal (dikumpulkan lewat SCeLE, bukan repo)
+*.pdf
+*.docx
+
+# ---- Rahasia ----
+.env
+*.key
+
+# ---- Python / tools ----
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build artefak paket
+*.egg-info/
+build/
+dist/

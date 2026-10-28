@@ -1,0 +1,108 @@
+# Konfigurasi pipeline preprocessing X + YouTube (kasus keracunan MBG).
+# Satu-satunya sumber konstanta. tests/test_config.py memastikan nilainya sama dengan collector.
+
+paths:
+  x_raw: x/raw
+  x_counts: x/counts
+  x_context: x/context/x_context.jsonl
+  youtube:
+    karo:
+      comments: youtube/yt_comments_all.csv
+      candidates: youtube/yt_candidates.csv
+    sukoharjo:
+      comments: youtube/sukoharjo/interim/yt_comments.csv
+      candidates: youtube/sukoharjo/interim/yt_candidates.csv
+  output_dir: processed
+  collectors:
+    x: x/x_collect.py
+    youtube: youtube/sukoharjo/youtube_collect.py
+
+relevance_rules: config/relevance_rules.yaml
+keywords_rq2: config/keywords_rq2.yaml
+text_resources:
+  slang: config/slang_dict.csv
+  stopwords_extra: config/stopwords_extra.txt
+  keep_tokens: config/keep_tokens.txt
+  protected_tokens: config/protected_tokens.txt
+  slogans: config/slogans.txt
+  connectives: config/connectives.txt
+  victim_names: config/victim_names.txt   # tidak di-commit; salin dari victim_names.example.txt
+
+time:
+  timezone_offset_hours: 7        # WIB
+  window_days: 45
+  segment_days: 9
+  incident:
+    sukoharjo: "2025-01-16"
+    karo: "2026-08-13"
+  health_report:
+    karo: "2026-09-08"           # laporan siswi hilang ingatan = hari ke-26
+  # Fase sama untuk kedua kasus agar sebanding: [mulai, akhir) dalam hari sejak insiden
+  phases:
+    awal: [0, 9]
+    tengah: [9, 26]
+    lanjut: [26, 45]
+
+x:
+  # Urutan prioritas: kueri pertama yang cocok menjadi primary_query sebuah tweet
+  queries: [XK1b, XK2b, XS1, XS2]
+  out_of_scope_queries: [XS3, XK3]   # hanya counts (D3)
+  keep_langs: [in]
+  # Tweet ber-lang lain tetap dipakai bila berisi >= N stopword Indonesia (label lang X sering salah untuk teks campur)
+  min_id_stopwords_for_other_lang: 3
+
+youtube:
+  thread_cap: 500                  # --max-pages 5 x 100 thread
+  # D12: 13 video Karo kena batas, sengaja tidak ditarik ulang. Pipeline gagal bila daftarnya berubah.
+  expected_thread_capped:
+    - 7ykDQEe8Z-o
+    - Ez3Q849Wvcc
+    - M08FclUreWw
+    - R3Dmasthm9U
+    - Tgx4ncFKG6A
+    - UmxQ8J2e8mA
+    - __bNKP6EZek
+    - c7O_gWXyd6I
+    - d5NYkym3sGY
+    - glR7rOHb7Xw
+    - o1wngrLJ6xs
+    - s4KRmdiMLOo
+    - z1VF6yBJTW0
+  main_relevance_levels: [inti, inti_hari_awal]          # D14
+  sensitivity_relevance_levels: [inti, inti_hari_awal, sub_kontroversi]   # hanya Karo
+  topic_max_per_video: 200          # D15
+  channel_type_map:
+    media: media
+    media_lokal: media
+    media_nasional: media
+    kreator: kreator
+    kreator_komentator: kreator
+
+quality:
+  dup_min_tokens: 4
+  copypasta_min_authors: 3
+  copypasta_min_tokens: 10
+  headline_min_authors: 3
+  low_content_max_tokens: 2         # < 3 token alfabet
+  hyperactive_min_docs: 20
+  hyperactive_quantile: 0.995       # ambang = max(min_docs, kuantil)
+  very_long_quantile: 0.99
+
+hashing:
+  salt_env: HASH_SALT
+  # Fingerprint sha256(salt)[:8] yang dipakai saat flatten YouTube. Dua salt berbeda (Y-SALT), tidak diketahui
+  # nilainya di sini; isi bila tim mengirim fingerprint. Hanya dicatat di manifest.
+  youtube_salt_fingerprint:
+    karo: null
+    sukoharjo: null
+
+seed: 20261028
+
+# Angka profiling 2026-10-28. Selisih dilaporkan di qa_report.md (peringatan, bukan error).
+expected_counts:
+  x_rows: 2431
+  x_unique: 2150
+  x_pages: 250
+  x_empty_files: 35
+  yt_karo_rows: 31150
+  yt_sukoharjo_rows: 1798

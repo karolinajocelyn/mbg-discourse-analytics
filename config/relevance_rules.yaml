@@ -1,0 +1,58 @@
+# Aturan relevansi. Semua pola adalah regex Python, dicocokkan pada teks lowercase setelah NFKC.
+# Diterapkan identik ke kedua kasus (D2, D14). Diubah di sini, bukan di kode.
+
+common:
+  program: '\bmbg\b|makan(an)? (siang )?bergizi|makan (siang )?gratis|mkn gratis|\bbgn\b|badan gizi|\bsppg\b|#?makanbergizigratis'
+  poisoning: 'keracun|keracvn|\bracun|beracun'
+  early_days: 9          # "hari awal" = hari 0-8 sejak insiden (segmen S1)
+
+# ---------------------------------------------------------------- YouTube: judul video
+# Urutan: off_topic -> sub_kontroversi -> inti (case) -> other_locations -> inti_hari_awal -> tidak
+video:
+  karo:
+    off_topic:
+      - 'dumpling|awet muda|jumatan|begal|squishy'
+    sub_kontroversi:
+      # pegawai SPPG mengejek korban hilang ingatan
+      - '(ejek|hina|olok|sindir|lelucon|rundung|bully|katsu)'
+      # kunjungan / permintaan maaf Wapres Gibran
+      - '(gibran|wapres).*(jenguk|kunjung|maaf|bekal|caper|temui|rujuk|datang)|(jenguk|kunjung|maaf|bekal|caper|temui|rujuk|datang).*(gibran|wapres)'
+    case:
+      - '\bkaro\b|berastagi|brastagi|kabanjahe'
+      - 'febi(ola|ona)?\w*|febi\s*yona|agnesia'
+      - '(hilang|kehilangan|gangguan|lupa|rusak)\s+(\d+%?\s+)?ingatan|ingatannya|ingatan\s+(hilang|terganggu)|amnesia|gangguan otak|dirujuk ke jakarta'
+      - '\brscm\b'
+      - '\b(265|353|361|362)\s+(siswa|pelajar|korban)'
+    other_cases:
+      - 'sidoarjo|batang|lampung|labuan bajo|garut|cianjur|bogor|sumba|jember|banggai|pandeglang|nunukan|bengkulu|kupang|papua|sragen|tasikmalaya|bandung|jakarta timur|sleman|ginjal'
+  sukoharjo:
+    off_topic:
+      - 'dilantik|staf khusus|dagu|squidward|street food|tahu tempe|animasi|leika|jarah daging|tiket pesawat'
+    sub_kontroversi:
+      - 'corbuzier|\bdeddy\b'
+    case:
+      - 'sukoharjo|\bdukuh\b|sdn\s*0?3\b|kodim\s*0726'
+      - '\b(40|50)\s+(siswa|anak|murid|pelajar)'
+    other_cases:
+      - 'nunukan|pandeglang|cianjur|labuan bajo|papua|bogor|garut|sumba|jember|banggai|kupang|sragen|tasikmalaya|ulat|belatung'
+
+# ---------------------------------------------------------------- X: teks tweet
+text:
+  case:
+    karo:
+      - '\bkaro\b|berastagi|brastagi|kabanjahe'
+      - 'febi(ola|ona)?\w*|febi\s*yona|agnesia'
+    sukoharjo:
+      - 'sukoharjo|\bdukuh\b|sdn\s*0?3\b|kodim\s*0726'
+  # D13: istilah insiden Sukoharjo (ayam kurang matang). Hanya berlaku di hari awal & tanpa lokasi lain.
+  incident_early:
+    sukoharjo:
+      - 'ayam tepung|(kurang|belum|setengah|tidak|tdk|gak|ga|gk|nggak|ngga|ndak)\s+mat[ae]ng'
+  other_cases:
+    sukoharjo: 'nunukan|pandeglang|cianjur|labuan bajo|papua|bogor|garut|sumba|jember|banggai|kupang|sragen|tasikmalaya|india|korea|jepang'
+    karo: 'sidoarjo|batang|lampung|labuan bajo|garut|cianjur|bogor|sumba|jember|banggai|pandeglang|nunukan|bengkulu|kupang|papua|sragen|tasikmalaya'
+  # XK2b: RSCM tanpa nama/lokasi hanya relevan setelah laporan kesehatan & bila ada istilah program/keracunan
+  rscm:
+    karo:
+      pattern: '\brscm\b|hilang ingatan|gangguan ingatan'
+      min_day: 20

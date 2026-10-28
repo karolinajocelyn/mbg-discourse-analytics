@@ -1,0 +1,26 @@
+# Kata kunci RQ2 (atribusi tanggung jawab & tuntutan). Regex, dicocokkan pada text_clean lowercase.
+# Kata kunci di proposal §1.6.4 ("tanggung jawab", "BGN", "kompensasi", "ganti rugi", "evaluasi") wajib ada (dites).
+
+pihak:
+  kw_bgn: '\bbgn\b|badan gizi|sudaryono|dadan'
+  kw_sppg: '\bsppg\b|dapur|vendor|katering|catering|mitra|penyedia'
+  kw_pemerintah: 'pemerintah|presiden|prabowo|gibran|istana|menteri|negara|\bdpr\b'
+  kw_sekolah: 'sekolah|guru|kepala sekolah|\bsdn?\b|\bsma\b|\bsmp\b'
+  kw_pemda: 'bupati|pemkab|pemda|dinkes|dinas kesehatan|pemerintah daerah|gubernur'
+
+penyebab:
+  kw_kualitas_makanan: 'basi|mentah|kurang mat[ae]ng|belum mat[ae]ng|setengah mat[ae]ng|bakteri|ayam|amis|berlendir|bau|busuk|belatung|ulat'
+  kw_pengawasan: 'pengawasan|diawasi|\bsop\b|standar|uji lab|hasil lab|labfor|\bbpom\b|higien|kebersihan'
+  kw_korupsi: 'korupsi|anggaran|mark ?up|proyek|cuan|untung|bancakan'
+
+tuntutan:
+  kw_tanggung_jawab: 'tanggung ?jawab|bertanggung|pertanggungjawab|salah siapa|disalahkan'
+  kw_kompensasi: 'kompensasi|ganti ?rugi|santunan|biaya pengobatan|ditanggung|asuransi'
+  kw_investigasi: 'investigasi|usut|selidik|penyelidikan|penyidikan|polisi|periksa|pidana|tersangka|proses hukum'
+  kw_evaluasi: 'evaluasi|audit|perbaik|reformasi|benahi|dibenahi|moratorium'
+  kw_hentikan: 'hentikan|dihentikan|\bstop\b|setop|bubarkan|dibubarkan|bubar|tutup mbg|tunda|batalkan'
+  kw_lanjutkan: 'lanjutkan|dilanjutkan|tetap jalan|teruskan|dukung mbg|jangan dihentikan|jangan dibubarkan'
+
+# Bukan RQ2, tetapi berguna untuk RQ1/RQ2 Karo (dampak kesehatan)
+lainnya:
+  kw_kesehatan: 'hilang ingatan|ingatan|kejang|\brscm\b|dirawat|rumah sakit|koma|meninggal|trauma'

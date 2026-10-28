@@ -1,0 +1,20 @@
+# Token yang tidak di-stem (nama lokasi, institusi, tokoh).
+karo
+berastagi
+brastagi
+kabanjahe
+sukoharjo
+dukuh
+bgn
+sppg
+mbg
+rscm
+dpr
+gibran
+prabowo
+corbuzier
+korban
+pemerintah
+pemerintahan
+sudaryono
+bpom

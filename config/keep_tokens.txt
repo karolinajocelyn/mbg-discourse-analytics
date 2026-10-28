@@ -1,0 +1,17 @@
+# Token yang TIDAK dibuang sebagai stopword: negasi & penanda stance.
+tidak
+bukan
+belum
+jangan
+tanpa
+harus
+tolong
+stop
+hentikan
+lanjut
+lanjutkan
+bubar
+bubarkan
+setuju
+tolak
+dukung

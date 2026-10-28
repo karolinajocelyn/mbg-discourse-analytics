@@ -1,0 +1,5 @@
+# Regex nama korban (anak di bawah umur). Salin ke victim_names.txt (di-.gitignore) dan isi.
+# Satu pola per baris, case-insensitive, dicocokkan pada text. Semua kecocokan diganti [KORBAN].
+# Jangan menulis marga saja (mis. hanya "purba") karena marga umum.
+# Contoh format:
+# \bnamadepan\w*(\s+(br\.?\s+)?marga)?\b

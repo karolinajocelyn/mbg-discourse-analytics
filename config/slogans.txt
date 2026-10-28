@@ -1,0 +1,4 @@
+# Slogan pendek yang sah (bukan low-content walau < 3 token). Regex pada text lowercase tanpa tanda baca.
+^(stop|setop|hentikan|bubarkan|bubar|tutup|lanjutkan|dukung|tolak|batalkan)\s+(program\s+)?mbg$
+^makan(an)?\s+beracun\s+gratis$
+^mbg\s+(beracun|racun)$
