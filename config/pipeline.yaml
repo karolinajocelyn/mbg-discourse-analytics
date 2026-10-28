@@ -15,7 +15,7 @@ paths:
   output_dir: processed
   collectors:
     x: x/x_collect.py
-    youtube: youtube/sukoharjo/youtube_collect.py
+    youtube: youtube/youtube_collect.py
 
 relevance_rules: config/relevance_rules.yaml
 keywords_rq2: config/keywords_rq2.yaml

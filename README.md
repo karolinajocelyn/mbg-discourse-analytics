@@ -73,7 +73,8 @@ src/anmedsos_prep/      paket preprocessing (load, scope, text, dedup, quality, 
 tests/                  pytest + proyek mini sintetis (tanpa data asli)
 notebooks/eda_qa.ipynb  EDA, hanya membaca processed/latest/
 x/                      collector X: x_counts.py, x_collect.py, x_context.py, x_verify.py, x_inspect.py, x_pilot.py
-youtube/sukoharjo/youtube_collect.py   collector YouTube (dipakai untuk kedua kasus)
+                        + LOG_PENGUMPULAN_X.md (perintah & versi skrip yang benar-benar dijalankan)
+youtube/               collector YouTube (dipakai untuk kedua kasus): youtube_collect.py, make_candidates_all.py
 preprocessing_plan.md                  rencana, temuan profiling data, keputusan D2-D17, keterbatasan
 ```
 
@@ -98,23 +99,43 @@ $env:HASH_SALT = "..."          # salt rahasia tim untuk pseudonimisasi
 | Segmen padat | `python x_collect.py --only XS1 --days 0-2 --tag S1a --cap 80` | sama | Hasil X urut dari terbaru, jadi segmen yang mentok dipecah per hari |
 | Konteks reply/quote | `python x_context.py` | `GET /2/tweets?ids=` | Hanya ID induk/kutipan yang belum ada di `raw/`, maks. 100 ID per request |
 | Verifikasi | `python x_verify.py XS1 XS2` | (offline) | Bandingkan post terambil vs counts per hari |
+| Uji kueri | `python x_pilot.py` | `GET /2/tweets/search/all` | Pilot 30 post per kueri; hasilnya tidak dipakai di data akhir |
 
 Kueri (semua `-is:retweet`): XS1 lokasi Sukoharjo + istilah program, XS2 ayam kurang matang + program,
 XK1b lokasi Karo + istilah program, XK2b nama korban/RSCM + istilah kasus. XS3/XK3 (gejala generik) hanya diambil
 counts-nya. Definisi lengkap ada di `x/x_collect.py`. Setiap respons disimpan utuh sebagai satu baris JSONL di
-`x/raw/x_<kasus>_<kueri>_<segmen>.jsonl`.
+`x/raw/x_<kasus>_<kueri>_<segmen>.jsonl`. Urutan perintah, opsi, dan versi skrip yang dipakai untuk tiap file
+tercatat di [x/LOG_PENGUMPULAN_X.md](x/LOG_PENGUMPULAN_X.md).
 
-### YouTube (jalankan dari folder yang berisi `raw/` dan `interim/`)
+### YouTube
+
+Script menulis ke `raw/` dan `interim/` di folder tempat ia dijalankan, jadi jalankan dari folder data tiap kasus
+(Sukoharjo: `youtube/sukoharjo/`). Kueri YS1–YS4 (Sukoharjo) dan YK1–YK7 (Karo) ada di `youtube/youtube_collect.py`.
 
 ```powershell
-python youtube_collect.py discover --dry-run     # rencana kuota
-python youtube_collect.py discover               # search.list per kueri x segmen -> interim/yt_candidates.csv
-python youtube_collect.py comments --max-pages 5 # commentThreads.list (100 thread/halaman) + comments.list untuk reply
-python youtube_collect.py flatten --comments-csv interim/yt_comments.csv   # butuh HASH_SALT
+cd youtube\sukoharjo
+python ..\youtube_collect.py discover --dry-run      # rencana kuota
+python ..\youtube_collect.py discover                # search.list + videos.list per kueri x segmen -> interim/yt_candidates.csv
+# (tim memberi label relevan=y/n di yt_candidates.csv untuk memilih video yang ditarik komentarnya)
+python ..\youtube_collect.py comments --max-pages 5  # commentThreads.list (100 thread/halaman) + comments.list untuk reply
+python ..\youtube_collect.py flatten                 # -> interim/yt_comments.csv, author di-hash (butuh HASH_SALT)
 ```
 
 Kuota dihitung sendiri oleh script dan berhenti di `--quota-limit` (default 6.000 dari 10.000 unit/hari).
-Komentar ditarik dengan urutan `relevance`, maks. 5 halaman per video (500 thread), dan semua reply.
+Komentar ditarik dengan urutan `relevance`, maks. 5 halaman per video (500 thread) dan semua reply, untuk video
+dengan ≥ 5 komentar. Video yang file raw-nya sudah ada dilewati (`--force` untuk menimpa).
+
+**Scrape ulang Karo (2026-10-27).** Supaya relevansi tidak bergantung pada label manual, komentar **semua** kandidat
+Karo ditarik, lalu relevansi ditentukan aturan judul di preprocessing:
+
+```powershell
+python ..\make_candidates_all.py                     # salinan kandidat dengan relevan=y untuk semua video
+python ..\youtube_collect.py --candidates interim/yt_candidates_all.csv comments
+python ..\youtube_collect.py flatten --comments-csv interim/yt_comments_all.csv
+```
+
+Riwayat tarik YouTube: Sukoharjo 20–22 Oktober 2026 (log: `interim/yt_collection_log.csv`); Karo batch awal
+2026-10-21 dan batch scrape ulang 2026-10-27 (terlihat di kolom `collected_at`).
 
 ---
 
